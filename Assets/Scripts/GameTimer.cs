@@ -6,23 +6,33 @@ public class GameTimer : MonoBehaviour
 {
     public float timeRemaining = 240f; // 4 minutes
     public TextMeshProUGUI timerText;
+    private bool timerStarted = false;
 
 void Awake()
 {
     DontDestroyOnLoad(gameObject);
 }
-    void Update()
+void Update()
+{
+    // start timer only in Scene2
+   if (SceneManager.GetActiveScene().buildIndex == 1)
+
+{
+
+    timerStarted = true;
+
+}
+
+    if (timerStarted && timeRemaining > 0)
     {
-        if (timeRemaining > 0)
-        {
-            timeRemaining -= Time.deltaTime;
-            UpdateTimerUI();
-        }
-        else
-        {
-            TimeUp();
-        }
+        timeRemaining -= Time.deltaTime;
+        UpdateTimerUI();
     }
+    else if (timeRemaining <= 0)
+    {
+        TimeUp();
+    }
+}
 
     void UpdateTimerUI()
     {
