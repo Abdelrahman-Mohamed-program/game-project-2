@@ -4,12 +4,15 @@ using UnityEngine.SceneManagement;
 public class PlayerMovement : MonoBehaviour
 {
     public GameObject pauseMenu;
+private bool nearDisk = false;
 
 private bool isPaused = false;
     public float speed = 5f;
     private float velocityY;
 
-private bool inDialogue = false;
+    public NotebookUI notebook;
+
+
     private bool nearDoor = false;
 public float gravity = -9.81f;
     public float mouseSensitivity = 2f;
@@ -29,6 +32,13 @@ private string currentNPC;
 
 void OnTriggerEnter(Collider other)
 {
+    if (other.CompareTag("Disk"))
+{
+    nearDisk = true;
+    sleepText.text = "Press E to open diary";
+    sleepText.gameObject.SetActive(true);
+}
+
     if (other.CompareTag("NPC"))
 {
     nearNPC = true;
@@ -64,6 +74,12 @@ void OnTriggerEnter(Collider other)
 
 void OnTriggerExit(Collider other)
 {
+    if (other.CompareTag("Disk"))
+{
+    nearDisk = false;
+    sleepText.gameObject.SetActive(false);
+}
+
     if (other.CompareTag("Bed"))
     {
         nearBed = false;
@@ -112,6 +128,7 @@ void PauseGame()
 
     Cursor.lockState = CursorLockMode.None;
     Cursor.visible = true;
+   
 }
 
 public void ExitGame()
@@ -153,27 +170,55 @@ void StartDialogue()
     {
         currentDialogue = new string[]
         {
-            "You don't have much time Son.",
-            "Stay focused.",
-            "Do not waste seconds."
+           "what a nice kid! You are a kind kid for getting urself and ur friends gifts, good luck in life kid"
         };
     }
     else if (currentNPC == "remy")
     {
         currentDialogue = new string[]
         {
-            "I still dance even in chaos.",
-            "Keeps the fear away."
+            "dude the music playing is fireee",
+        "looking for someone? Try talking to people to help"
         };
     }
     else if (currentNPC == "bella")
     {
         currentDialogue = new string[]
         {
-            "Something feels wrong here.",
-            "Be careful."
+            "the weather is so hot, I could use something cold to drink",
+"⁠you are looking for a guy in a white shirt I think?"
         };
-    }
+    } else if(currentNPC == "bad")
+        {
+            currentDialogue = new string[]
+        { 
+            "you are choosing to get a game for yourself and u r forgetting the friend who came and waited especially for u in the car?",
+            " What a selfish kid"
+        };
+           
+        }else if(currentNPC == "broken")
+        {
+            currentDialogue = new string[]
+        { 
+            "dude the guy near the black tower and car vendor drove over my leg",
+            "i don't know when will I be able to walk normally again"
+        };
+        }else if(currentNPC == "tree")
+        {
+            currentDialogue = new string[]
+        { 
+              "you are in search for a small black shop close by a neighborhood, I will see u in 4 hours!",
+             "good luck in ur search my child"
+        };
+           
+        }else if(currentNPC == "crazy")
+        {
+            currentDialogue = new string[]
+        { 
+            "why did we make this game in 2 weeks!!",
+            "the guy in the white shirt close to me sure is nice and lucky"
+        };
+        }
 
     dialogueIndex = 0;
 
@@ -202,6 +247,12 @@ void EndDialogue()
 }
     void Update()
     {
+
+if (nearDisk && Input.GetKeyDown(KeyCode.E))
+{
+    notebook.OpenNotebook();
+    sleepText.gameObject.SetActive(false);
+}
         if (nearNPC && !dialogueActive && Input.GetKeyDown(KeyCode.Alpha1))
 {
     StartDialogue();
@@ -235,13 +286,16 @@ if (nearDoor && Input.GetKeyDown(KeyCode.E))
    SceneManager.LoadScene(1);
 }
         Move();
-        Look();
+       if (!dialogueActive && !isPaused)
+{
+    Look();
+}
     }
 
 
 void Move()
 {
-    if (inDialogue || isPaused) return;
+ if (dialogueActive || isPaused) return;
     float x = Input.GetAxis("Horizontal");
     float z = Input.GetAxis("Vertical");
 bool isMoving = x != 0 || z != 0;
