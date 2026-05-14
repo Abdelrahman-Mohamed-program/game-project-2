@@ -11,8 +11,10 @@ private bool isPaused = false;
     private float velocityY;
 
     public NotebookUI notebook;
+[SerializeField] Transform groundCheck;
+[SerializeField] LayerMask ground;
 
-
+[SerializeField] private float fallThreshold = -2f;
     private bool nearDoor = false;
 public float gravity = -9.81f;
     public float mouseSensitivity = 2f;
@@ -29,6 +31,7 @@ private string[] currentDialogue;
 private int dialogueIndex = 0;
 
 private string currentNPC;
+private Vector3 startingposition;
 
 void OnTriggerEnter(Collider other)
 {
@@ -108,10 +111,11 @@ private bool nearBed = false;
     public Transform playerCamera;
 
   void Start()
-{
+{ 
     controller = GetComponent<CharacterController>();
 
 animator = GetComponent<Animator>();
+startingposition = transform.position;
     if (sleepText == null)
         Debug.LogError("SleepText is NOT assigned in Inspector!");
 
@@ -298,6 +302,7 @@ void Move()
  if (dialogueActive || isPaused) return;
     float x = Input.GetAxis("Horizontal");
     float z = Input.GetAxis("Vertical");
+    
 bool isMoving = x != 0 || z != 0;
 
 
@@ -315,7 +320,13 @@ else
 
     characterAnimator.speed = 0;
 
-}
+} if (groundCheck != null && groundCheck.position.y < fallThreshold) 
+    {
+        controller.enabled = false; 
+        transform.position = startingposition; 
+        velocityY = 0f; 
+        controller.enabled = true; 
+    }
     Vector3 move = transform.right * x + transform.forward * z;
 
     // gravity handling
@@ -330,7 +341,8 @@ else
     finalMove.y = velocityY;
 
     controller.Move(finalMove * Time.deltaTime);
-}
+} 
+
     void Look()
     {
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
